@@ -1,33 +1,30 @@
-// Scene
+import * as THREE from 'three';
+
 const scene = new THREE.Scene();
-
-// Orthographic Camera
-const aspectRatio = window.innerWidth / window.innerHeight;
-const camera = new THREE.OrthographicCamera(-aspectRatio * 2, aspectRatio * 2, 2, -2, 1, 1000);
-camera.position.set(0, 0, 10); // Default position
-
-// Renderer
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 const renderer = new THREE.WebGLRenderer();
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Axes Helper
-const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper);
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: 0xdb4045 });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
 
-// Example for the first mesh in red
-const geometry1 = new THREE.BoxGeometry();
-const material1 = new THREE.MeshBasicMaterial({color: 0xff0000});
-const mesh1 = new THREE.Mesh(geometry1, material1);
-mesh1.position.set(-1, 1, 0); // Adjust position to center in the 1st quadrant
-scene.add(mesh1);
+// Set camera position
+camera.position.z = 5;
 
-// Repeat for the other three meshes with their respective colors and positions
+// Add light source
+const light = new THREE.PointLight(0xffffff, 1);
+light.position.set(0, 0, 5);
+scene.add(light);
 
-
-// Render Function
-function render() {
+function animate() {
+    requestAnimationFrame(animate);
+    cube.rotation.x += 0.01;
+    cube.rotation.y -= 0.01; // negative angle is clockwise
+    cube.rotation.z += 0.01;
     renderer.render(scene, camera);
 }
-
-render();
+animate();
