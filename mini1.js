@@ -6,8 +6,10 @@ export default function mini1() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-2, 2, 2, -2, 1, 1000);
-    
+    //const camera = new THREE.OrthographicCamera(-2, 2, 2, -2, 1, 1000);
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const camera = new THREE.OrthographicCamera(-aspectRatio * 2, aspectRatio * 2, 2, -2, 1, 1000);
+
     // helpers
     const axesHelper = new THREE.AxesHelper(5);
     scene.add(axesHelper);
