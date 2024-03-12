@@ -41,5 +41,3 @@ export default function mini1() {
     // rendering
     renderer.render(scene, camera);
 }
-
-mini1();
