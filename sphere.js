@@ -1,28 +1,7 @@
-// Mini-Program #2 (Exercise): Edit the following code to
-// 1. modify the point light source for it to be a RED color light source
-// 2. add two more light sources, one should be GREEN, and the other BLUE in color
-// 3. add also two more corresponding light helpers
-// 4. set the 3 light positions such that they are in different locations
-
 import * as THREE from "three";
 
-export default function CHUA_LIGHTS() {
-  const scene = new THREE.Scene();
-
-  const renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  //-----  GEOMETRY -----
+export default function sphere(scene) {
   const geometry = new THREE.SphereGeometry(2, 64, 64);
-
-  //----- MATERIAL if there is NO LIGHTING -----
-  // If there is no lighting use MeshBasicMaterial
-  //const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-
-  //----- MATERIAL if there is LIGHTING -----
-  //
-  // Diffuse + Specular material property: use MeshPhongMaterial()
   const material = new THREE.MeshPhongMaterial({
     color: 0xffffff,
     specular: 0xff0000,
@@ -75,18 +54,5 @@ export default function CHUA_LIGHTS() {
   const blueLightHelper = new THREE.PointLightHelper(blueLight, 0.5);
   scene.add(blueLightHelper);
 
-  //----- CAMERA -----
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.z = 15;
-
-  //----- ACTION! -----
-  renderer.render(scene, camera); 
-  // just render one frame, no animation
+  return scene;
 }
-
-CHUA_LIGHTS();
