@@ -10,6 +10,35 @@ import sphere from "./sphere.js";
 //mini1();
 //light();
 
+class CustomControls {
+    constructor(camera) {
+        this.camera = camera;
+        this.phi = 0; // vertical angle
+        this.theta = 0; // horizontal angle
+    }
+
+    lookRight(angle) {
+        // rotate horizontally
+        this.theta -= angle;
+        this.update();
+    }
+
+    lookUp(angle) {
+        // rotate vertically
+        this.phi -= angle;
+        this.update();
+    }
+
+    update() {
+        const radius = 10; // distance from the camera to the origin
+        const x = radius * Math.sin(this.phi) * Math.cos(this.theta);
+        const y = radius * Math.cos(this.phi);
+        const z = radius * Math.sin(this.phi) * Math.sin(this.theta);
+        this.camera.position.set(x, y, z);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    }
+}
+
 /* -----------------------------------------SCENE, CAMERA, RENDERER-----------------------------------------*/
 
 const scene = new THREE.Scene();
@@ -27,7 +56,8 @@ document.body.appendChild(renderer.domElement);
 /* -----------------------------------------CAMERA CONTROLS-----------------------------------------*/
 
 const target = document.getElementById("3d-canvas"); // Get the canvas element
-const controls = new FirstPersonControls(camera, target); // Set the target as the second argument
+const controls = new CustomControls(camera);
+//const controls = new FirstPersonControls(camera, target); // Set the target as the second argument
 controls.movementSpeed = 10;
 controls.lookSpeed = 0.3;
 controls.noFly = true;
@@ -106,6 +136,33 @@ window.addEventListener("keyup", (e) => {
 	}
 });
 
+// Request pointer lock
+target.requestPointerLock = target.requestPointerLock || target.mozRequestPointerLock;
+document.addEventListener('click', function() {
+    target.requestPointerLock();
+});
+
+// Listen for lock event
+document.addEventListener('pointerlockchange', lockChange, false);
+document.addEventListener('mozpointerlockchange', lockChange, false);
+
+function lockChange() {
+    if (document.pointerLockElement === target || document.mozPointerLockElement === target) {
+        // Pointer was just locked
+        // Enable the mousemove listener
+        document.addEventListener("mousemove", updatePosition, false);
+    } else {
+        // Pointer was just unlocked
+        // Disable the mousemove listener
+        document.removeEventListener("mousemove", updatePosition, false);
+    }
+}
+
+function updatePosition(e) {
+    controls.lookRight(e.movementX * 0.002);
+    controls.lookUp(e.movementY * 0.002);
+}
+
 /* -----------------------------------------MATERIALS-----------------------------------------*/
 
 sphere(scene);
@@ -124,7 +181,7 @@ function animate() {
 	if (keys.right) camera.position.x += cameraSpeed;
     if (keys.space) camera.position.y += cameraSpeed;
     if (keys.shift) camera.position.y -= cameraSpeed;
-	controls.update(clock.getDelta()); // Update camera controls
+
 	renderer.render(scene, camera);
 	console.log(camera.position);
 }
