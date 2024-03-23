@@ -13,31 +13,38 @@ import sphere from "./sphere.js";
 class CustomControls {
     constructor(camera) {
         this.camera = camera;
-        this.phi = 0; // vertical angle
-        this.theta = 0; // horizontal angle
+        this.yaw = 0;
+        this.pitch = 0;
     }
 
     lookRight(angle) {
-        // rotate horizontally
-        this.theta -= angle;
+        this.yaw -= angle;
         this.update();
     }
 
     lookUp(angle) {
-        // rotate vertically
-        this.phi -= angle;
+        this.pitch -= angle;
         this.update();
     }
 
     update() {
-        const radius = 10; // distance from the camera to the origin
-        const x = radius * Math.sin(this.phi) * Math.cos(this.theta);
-        const y = radius * Math.cos(this.phi);
-        const z = radius * Math.sin(this.phi) * Math.sin(this.theta);
-        this.camera.position.set(x, y, z);
-        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+        // Clamp the pitch
+        this.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitch));
+
+        const quaternionY = new THREE.Quaternion();
+        const quaternionX = new THREE.Quaternion();
+
+        // Rotate around world Y axis
+        quaternionY.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.yaw);
+        // Rotate around local X axis
+        quaternionX.setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.pitch);
+
+        const finalQuaternion = new THREE.Quaternion().multiplyQuaternions(quaternionY, quaternionX);
+        this.camera.quaternion.copy(finalQuaternion);
     }
 }
+
+
 
 /* -----------------------------------------SCENE, CAMERA, RENDERER-----------------------------------------*/
 
@@ -173,18 +180,49 @@ camera.position.z = 15;
 
 let clock = new THREE.Clock();
 // Render loop
-function animate() {
-	requestAnimationFrame(animate);
-	if (keys.up) camera.position.z -= cameraSpeed;
-	if (keys.down) camera.position.z += cameraSpeed;
-	if (keys.left) camera.position.x -= cameraSpeed;
-	if (keys.right) camera.position.x += cameraSpeed;
-    if (keys.space) camera.position.y += cameraSpeed;
-    if (keys.shift) camera.position.y -= cameraSpeed;
+// function animate() {
+// 	requestAnimationFrame(animate);
+// 	if (keys.up) camera.position.z -= cameraSpeed;
+// 	if (keys.down) camera.position.z += cameraSpeed;
+// 	if (keys.left) camera.position.x -= cameraSpeed;
+// 	if (keys.right) camera.position.x += cameraSpeed;
+//     if (keys.space) camera.position.y += cameraSpeed;
+//     if (keys.shift) camera.position.y -= cameraSpeed;
 
-	renderer.render(scene, camera);
-	console.log(camera.position);
+// 	renderer.render(scene, camera);
+// 	console.log(camera.position);
+// }
+function animate() {
+    requestAnimationFrame(animate);
+
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+    const right = new THREE.Vector3();
+    right.crossVectors(camera.up, direction).normalize();
+
+    const speed = cameraSpeed;
+    if (keys.up) { // W - move forward
+        camera.position.addScaledVector(direction, speed);
+    }
+    if (keys.down) { // S - move backward
+        camera.position.addScaledVector(direction, -speed);
+    }
+    if (keys.left) { // A - move left
+        camera.position.addScaledVector(right, speed);
+    }
+    if (keys.right) { // D - move right
+        camera.position.addScaledVector(right, -speed);
+    }
+    if (keys.space) { // Space - move up
+        camera.position.y += speed;
+    }
+    if (keys.shift) { // Shift - move down
+        camera.position.y -= speed;
+    }
+
+    renderer.render(scene, camera);
 }
+
 animate();
 
 // Handle keyboard events for camera movement
