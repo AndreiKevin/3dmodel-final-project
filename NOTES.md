@@ -1,5 +1,13 @@
 # BLENDER NOTES
 
+## Useful Tools
+### Modifiers
+1. Array --> to duplicate objects and offset them
+2. Mirror --> to mirror objects
+3. Subdivision Surface --> to smooth out objects
+4. Solidify --> to give thickness to objects
+5. Simple Deform --> to bend objects
+
 ## Viewing Tips
 shift+h --> to hide everything except the selected mesh
 alt+h --> to unhide everything
