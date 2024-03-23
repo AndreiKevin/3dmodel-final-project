@@ -17,3 +17,9 @@ motion are very well defined.
 Demonstrated superior knowledge of 
 modeling and 
 animation techniques
+
+
+Shape--bamboo, roof, lamps, building, torii, 
+Material properties--bamboo, water, stone, wood, and paper--are very well done.
+Motion/Animation--lamp Swinging, incense smoke, water flow, and light flicker--is very well done.
+Lighting--3 lamps, incense, moon light water reflection
