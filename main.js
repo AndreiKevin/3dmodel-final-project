@@ -1,14 +1,6 @@
 import * as THREE from "three";
-import { FirstPersonControls } from "three/examples/jsm/controls/FirstPersonControls";
-
-import mini1 from "./mini1.js";
-import cube from "./cube.js";
-import light from "./lights.js";
-import sphere from "./sphere.js";
-
-//cube();
-//mini1();
-//light();
+import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 class CustomControls {
     constructor(camera) {
@@ -59,6 +51,9 @@ camera.position.z = 15;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.id = "3d-canvas"; // Set a unique id for the canvas
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------------------CAMERA CONTROLS-----------------------------------------*/
@@ -173,12 +168,30 @@ function updatePosition(e) {
 
 /* -----------------------------------------MATERIALS-----------------------------------------*/
 
-sphere(scene);
+const gltfLoader = new GLTFLoader();
+
+gltfLoader.load('test2.glb', function (gltf) {
+    scene.add(gltf.scene); // `gltf.scene` contains the model's scene graph
+}, undefined, function (error) {
+    console.error('An error happened during the loading of the model:', error);
+});
+
 
 
 /* -----------------------------------------LIGHTS-----------------------------------------*/
 
-
+const exrLoader = new EXRLoader();
+exrLoader.load(
+    '/textures/NightEnvironmentHDRI007_4K-HDR.exr',
+    function (texture) {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      scene.environment = texture;
+    },
+    undefined, // Progress callback (optional)
+    function (error) {
+      console.error('An error happened loading the EXR file:', error);
+    }
+  );
 
 
 
