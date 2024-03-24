@@ -41,6 +41,7 @@ class CustomControls {
 /* -----------------------------------------SCENE, CAMERA, RENDERER-----------------------------------------*/
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xc0a14);
 const camera = new THREE.PerspectiveCamera(
 	75,
 	window.innerWidth / window.innerHeight,
@@ -53,7 +54,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.id = "3d-canvas"; // Set a unique id for the canvas
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
-renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------------------CAMERA CONTROLS-----------------------------------------*/
@@ -193,45 +193,61 @@ exrLoader.load(
     }
   );
 
-  function addStar() {
-    const geometry = new THREE.SphereGeometry(0.1, 24, 24);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0xffffff,
-      emissiveIntensity: 1
-    });
-    const star = new THREE.Mesh(geometry, material);
+//   function addStar() {
+//     const geometry = new THREE.SphereGeometry(0.1, 24, 24);
+//     const material = new THREE.MeshStandardMaterial({
+//       color: 0xffffff,
+//       emissive: 0xffffff,
+//       emissiveIntensity: 1
+//     });
+//     const star = new THREE.Mesh(geometry, material);
 
-    const x = THREE.MathUtils.randFloatSpread(1000);
-    const y = THREE.MathUtils.randFloat(300, 500);
-    const z = THREE.MathUtils.randFloatSpread(1000);
+//     const x = THREE.MathUtils.randFloatSpread(1000);
+//     const y = THREE.MathUtils.randFloat(300, 500);
+//     const z = THREE.MathUtils.randFloatSpread(1000);
 
-    star.position.set(x, y, z);
-    scene.add(star);
+//     star.position.set(x, y, z);
+//     scene.add(star);
 
-    // Glow effect
-    const spriteMaterial = new THREE.SpriteMaterial({
-      map: new THREE.TextureLoader().load('textures/blue_star.png'), // Use a glow effect texture
-      color: 0xffffff,
-      transparent: true,
-      blending: THREE.AdditiveBlending
-    });
-    const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(2, 2, 1); // Adjust scale to make the glow effect larger or smaller
-    star.add(sprite); // Add the glow effect as a child of the star so it moves with the star
-}
+//     // Glow effect
+//     const spriteMaterial = new THREE.SpriteMaterial({
+//       map: new THREE.TextureLoader().load('textures/blue_star.png'), // Use a glow effect texture
+//       color: 0xffffff,
+//       transparent: true,
+//       blending: THREE.AdditiveBlending
+//     });
+//     const sprite = new THREE.Sprite(spriteMaterial);
+//     sprite.scale.set(2, 2, 1); // Adjust scale to make the glow effect larger or smaller
+//     star.add(sprite); // Add the glow effect as a child of the star so it moves with the star
+// }
 
-Array(100).fill().forEach(addStar); // Add 200 stars
-const ambientLight = new THREE.AmbientLight(0x555555);
-scene.add(ambientLight);
-
-
+// Array(100).fill().forEach(addStar); // Add 200 stars
+// const ambientLight = new THREE.AmbientLight(0x555555);
+// scene.add(ambientLight);
 
 
 
 
 
 
+
+
+
+
+
+
+// Moon
+const moonTexture = new THREE.TextureLoader().load('path_to_moon_texture.jpg'); // Replace with the path to your texture
+const moonGeo = new THREE.SphereGeometry(5, 32, 32);
+const moonMat = new THREE.MeshStandardMaterial({
+  map: moonTexture,
+  emissive: 0xffffff,
+  emissiveIntensity: 0.5
+});
+
+const moon = new THREE.Mesh(moonGeo, moonMat);
+moon.position.set(50, 100, -300); // Adjust position according to your scene
+scene.add(moon);
 
 
 
