@@ -193,6 +193,37 @@ exrLoader.load(
     }
   );
 
+  function addStar() {
+    const geometry = new THREE.SphereGeometry(0.1, 24, 24);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      emissive: 0xffffff,
+      emissiveIntensity: 1
+    });
+    const star = new THREE.Mesh(geometry, material);
+
+    const x = THREE.MathUtils.randFloatSpread(1000);
+    const y = THREE.MathUtils.randFloat(300, 500);
+    const z = THREE.MathUtils.randFloatSpread(1000);
+
+    star.position.set(x, y, z);
+    scene.add(star);
+
+    // Glow effect
+    const spriteMaterial = new THREE.SpriteMaterial({
+      map: new THREE.TextureLoader().load('textures/blue_star.png'), // Use a glow effect texture
+      color: 0xffffff,
+      transparent: true,
+      blending: THREE.AdditiveBlending
+    });
+    const sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(2, 2, 1); // Adjust scale to make the glow effect larger or smaller
+    star.add(sprite); // Add the glow effect as a child of the star so it moves with the star
+}
+
+Array(100).fill().forEach(addStar); // Add 200 stars
+const ambientLight = new THREE.AmbientLight(0x555555);
+scene.add(ambientLight);
 
 
 
