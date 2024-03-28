@@ -40,3 +40,11 @@ e --> extrude
 
 Camera View stuff and animation I stopped watching:
 https://youtu.be/Ff0aobJRSNc?si=p9QouPFFp3u9tWfS&t=935
+
+
+Low poly tree:
+https://free3d.com/3d-model/low_poly_tree-816203.html
+https://free3d.com/3d-model/low-poly-tree-449895.html
+
+Bush:
+https://free3d.com/3d-model/-bush-model-965691.html
