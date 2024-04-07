@@ -221,31 +221,57 @@ gltfLoader.load('scene.gltf', function (gltf) {
 
 let startTime = Date.now();
 const cycleDuration = 600000; // 10 minutes in milliseconds (5 minutes for night + 5 minutes for day)
-//const cycleDuration = 100000;
+const initialDelayDuration = 600000;
+//const cycleDuration = 10000;
+
+let originalMoonColor = new THREE.Color(0xE1E6FF); // Save the original moon color
+const sunColor = new THREE.Color(0xFFFF00); // Define a color for the sun
+const nightColor = new THREE.Color(0x0a0a23); // Dark blue for night
+const dayColor = new THREE.Color(0x87ceeb); // Light blue for day
 
 function animate() {
     let elapsedTime = Date.now() - startTime;
-  let cycleProgress = (elapsedTime % cycleDuration) / cycleDuration;
-  let isNight = cycleProgress < 0.5;
+    if (elapsedTime > initialDelayDuration) {
+        elapsedTime -= initialDelayDuration;
+        let cycleProgress = (elapsedTime % cycleDuration) / cycleDuration;
+        let isNight = cycleProgress < 0.5;
 
-  if (isNight) {
-    moonMesh.visible = true; // Make the moon visible during night
-    // Move the moon based on cycleProgress, this is a simplified linear movement
-    let moonPathProgress = cycleProgress / 0.5; // Normalize progress to [0,1] for night time
-    moonMesh.position.x = moonPathProgress * 10 - 5; // Example movement from -5 to 5 on x-axis
-    moonLight.color.setHSL(0.13, 1, Math.max(0.2, 1 - 2 * moonPathProgress)); // Change color to yellowish as it approaches day
-    moonLight.intensity = Math.max(1, 2 - 4 * moonPathProgress); // Decrease intensity as it approaches day
-  } else {
-    // During day, keep the moon outside of the scene or make it invisible
-    moonMesh.visible = false;
-    // Reset moon's position for the next night
-    if (moonMesh.position.x !== -5) moonMesh.position.x = -5;
-
-    // Change light to be yellow and more intense as it becomes daytime
-    let dayProgress = (cycleProgress - 0.5) * 2; // Normalize progress to [0,1] for day time
-    moonLight.color.setHSL(0.13, 1, Math.min(1, 0.2 + dayProgress)); // Change color to more yellow as day progresses
-    moonLight.intensity = Math.min(2, 1 + dayProgress); // Increase intensity during day
-  }
+        if (isNight) {
+            // Night cycle
+            moonMesh.visible = true;
+            // Change moonMesh emissive color to its original color for the moon representation
+            moonMesh.material.emissive.set(originalMoonColor);
+            
+            // Calculate moon's y position for the night time
+            let moonPathProgress = cycleProgress / 0.5; // Normalize progress to [0,1] for night time
+            moonMesh.position.y = moonPathProgress * 1000 - 500;
+            
+            // Adjust scene background to transition from night to day
+            let backgroundColor = new THREE.Color().lerpColors(dayColor, nightColor, moonPathProgress);
+            scene.background = backgroundColor;
+            
+            // Adjust lighting for night
+            moonLight.color.setHSL(0.13, 1, Math.max(0.2, 1 - 2 * moonPathProgress));
+            moonLight.intensity = Math.max(1, 2 - 4 * moonPathProgress);
+        } else {
+            // Day cycle
+            moonMesh.visible = true;
+            // Change moonMesh emissive color to sun color for the sun representation
+            moonMesh.material.emissive.set(sunColor);
+            
+            // Calculate sun's y position for the day time
+            let dayProgress = (cycleProgress - 0.5) * 2; // Normalize progress to [0,1] for day time
+            moonMesh.position.y = dayProgress * 1000 - 500;
+            
+            // Adjust scene background to transition from day to night
+            let backgroundColor = new THREE.Color().lerpColors(nightColor, dayColor, dayProgress);
+            scene.background = backgroundColor;
+            
+            // Adjust lighting for day
+            moonLight.color.setHSL(0.13, 1, Math.min(1, 0.2 + dayProgress));
+            moonLight.intensity = Math.min(2, 1 + dayProgress);
+        }
+    }
 
     requestAnimationFrame(animate);
 
