@@ -54,15 +54,12 @@ camera.position.x = 6.43933;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.id = "3d-canvas"; // Set a unique id for the canvas
-// renderer.toneMapping = THREE.ACESFilmicToneMapping;
-// renderer.toneMappingExposure = 1.0;
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------------------CAMERA CONTROLS-----------------------------------------*/
 
-const target = document.getElementById("3d-canvas"); // Get the canvas element
+const target = document.getElementById("3d-canvas"); 
 const controls = new CustomControls(camera);
-//const controls = new FirstPersonControls(camera, target); // Set the target as the second argument
 controls.movementSpeed = 10;
 controls.lookSpeed = 0.3;
 controls.noFly = true;
@@ -73,9 +70,8 @@ controls.verticalMax = 2.0;
 controls.lon = -150;
 controls.lat = 120;
 
-let cameraSpeed = 0.1; // Adjust speed as needed
+let cameraSpeed = 0.1; 
 
-// Create key state object
 let keys = {
 	up: false,
 	down: false,
@@ -85,7 +81,7 @@ let keys = {
 	shift: false,
 };
 
-// Add event listeners for keydown
+// Add event listeners for pressing keys
 window.addEventListener("keydown", (e) => {
 	switch (e.key) {
 		case "ArrowUp":
@@ -113,7 +109,6 @@ window.addEventListener("keydown", (e) => {
 	}
 });
 
-// Add event listeners for keyup
 window.addEventListener("keyup", (e) => {
 	switch (e.key) {
 		case "ArrowUp":
@@ -200,23 +195,6 @@ gltfLoader.load('scene.gltf', function (gltf) {
     console.error('An error happened during the loading of the model:', error);
 });
 
-
-
-/* -----------------------------------------LIGHTS-----------------------------------------*/
-
-// const exrLoader = new EXRLoader();
-// exrLoader.load(
-//     '/textures/NightEnvironmentHDRI007_4K-HDR.exr',
-//     function (texture) {
-//       texture.mapping = THREE.EquirectangularReflectionMapping;
-//       scene.environment = texture;
-//     },
-//     undefined, // Progress callback (optional)
-//     function (error) {
-//       console.error('An error happened loading the EXR file:', error);
-//     }
-//   );
-
 /* -----------------------------------------RENDERING-----------------------------------------*/
 
 let startTime = Date.now();
@@ -224,10 +202,10 @@ const cycleDuration = 600000; // 10 minutes in milliseconds (5 minutes for night
 const initialDelayDuration = 600000;
 //const cycleDuration = 10000;
 
-let originalMoonColor = new THREE.Color(0xE1E6FF); // Save the original moon color
-const sunColor = new THREE.Color(0xFFFF00); // Define a color for the sun
-const nightColor = new THREE.Color(0x0a0a23); // Dark blue for night
-const dayColor = new THREE.Color(0x87ceeb); // Light blue for day
+let originalMoonColor = new THREE.Color(0xE1E6FF); 
+const sunColor = new THREE.Color(0xFFFF00); 
+const nightColor = new THREE.Color(0x0a0a23); 
+const dayColor = new THREE.Color(0x87ceeb); 
 
 function animate() {
     let elapsedTime = Date.now() - startTime;
