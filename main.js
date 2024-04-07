@@ -220,8 +220,9 @@ gltfLoader.load('scene.gltf', function (gltf) {
 /* -----------------------------------------RENDERING-----------------------------------------*/
 
 let startTime = Date.now();
-//const cycleDuration = 600000; // 10 minutes in milliseconds (5 minutes for night + 5 minutes for day)
-const cycleDuration = 10000;
+const cycleDuration = 600000; // 10 minutes in milliseconds (5 minutes for night + 5 minutes for day)
+const initialDelayDuration = 600000;
+//const cycleDuration = 10000;
 
 let originalMoonColor = new THREE.Color(0xE1E6FF); // Save the original moon color
 const sunColor = new THREE.Color(0xFFFF00); // Define a color for the sun
@@ -230,47 +231,47 @@ const dayColor = new THREE.Color(0x87ceeb); // Light blue for day
 
 function animate() {
     let elapsedTime = Date.now() - startTime;
-    let cycleProgress = (elapsedTime % cycleDuration) / cycleDuration;
-    let isNight = cycleProgress < 0.5;
+    if (elapsedTime > initialDelayDuration) {
+        elapsedTime -= initialDelayDuration;
+        let cycleProgress = (elapsedTime % cycleDuration) / cycleDuration;
+        let isNight = cycleProgress < 0.5;
 
-    // Adjust transition speed and period of stability
-    let transitionSpeed = 2; // Control the speed of transition
-    let stablePeriodStart = 0.2; // Start of the stable period (20% of the half cycle)
-    let stablePeriodEnd = 0.8; // End of the stable period (80% of the half cycle)
-    let adjustedProgress = (cycleProgress * transitionSpeed) % 1.0; // Adjust progress for quicker transition
-    // Clamp adjustedProgress within stablePeriodStart and stablePeriodEnd for a period of stability
-    adjustedProgress = Math.min(Math.max(adjustedProgress, stablePeriodStart), stablePeriodEnd);
-
-    if (isNight) {
-        moonMesh.visible = true;
-        moonMesh.material.emissive.set(originalMoonColor);
-        // Calculate and adjust moon's position for a quicker transition and stability
-        let moonPathProgress = adjustedProgress / 0.5;
-        moonMesh.position.y = moonPathProgress * 1000 - 500;
-
-        // Adjust scene background for a quicker transition and stability during the night
-        let backgroundColor = new THREE.Color().lerpColors(dayColor, nightColor, moonPathProgress);
-        scene.background = backgroundColor;
-
-        // Adjust lighting for night with the modified progress
-        moonLight.color.setHSL(0.13, 1, Math.max(0.2, 1 - 2 * moonPathProgress));
-        moonLight.intensity = Math.max(1, 2 - 4 * moonPathProgress);
-    } else {
-        moonMesh.visible = true;
-        moonMesh.material.emissive.set(sunColor);
-        // Calculate and adjust sun's position for a quicker transition and stability
-        let dayProgress = (adjustedProgress - 0.5) * 2;
-        moonMesh.position.y = dayProgress * 1000 - 500;
-
-        // Adjust scene background for a quicker transition and stability during the day
-        let backgroundColor = new THREE.Color().lerpColors(nightColor, dayColor, dayProgress);
-        scene.background = backgroundColor;
-
-        // Adjust lighting for day with the modified progress
-        moonLight.color.setHSL(0.13, 1, Math.min(1, 0.2 + dayProgress));
-        moonLight.intensity = Math.min(2, 1 + dayProgress);
+        if (isNight) {
+            // Night cycle
+            moonMesh.visible = true;
+            // Change moonMesh emissive color to its original color for the moon representation
+            moonMesh.material.emissive.set(originalMoonColor);
+            
+            // Calculate moon's y position for the night time
+            let moonPathProgress = cycleProgress / 0.5; // Normalize progress to [0,1] for night time
+            moonMesh.position.y = moonPathProgress * 1000 - 500;
+            
+            // Adjust scene background to transition from night to day
+            let backgroundColor = new THREE.Color().lerpColors(dayColor, nightColor, moonPathProgress);
+            scene.background = backgroundColor;
+            
+            // Adjust lighting for night
+            moonLight.color.setHSL(0.13, 1, Math.max(0.2, 1 - 2 * moonPathProgress));
+            moonLight.intensity = Math.max(1, 2 - 4 * moonPathProgress);
+        } else {
+            // Day cycle
+            moonMesh.visible = true;
+            // Change moonMesh emissive color to sun color for the sun representation
+            moonMesh.material.emissive.set(sunColor);
+            
+            // Calculate sun's y position for the day time
+            let dayProgress = (cycleProgress - 0.5) * 2; // Normalize progress to [0,1] for day time
+            moonMesh.position.y = dayProgress * 1000 - 500;
+            
+            // Adjust scene background to transition from day to night
+            let backgroundColor = new THREE.Color().lerpColors(nightColor, dayColor, dayProgress);
+            scene.background = backgroundColor;
+            
+            // Adjust lighting for day
+            moonLight.color.setHSL(0.13, 1, Math.min(1, 0.2 + dayProgress));
+            moonLight.intensity = Math.min(2, 1 + dayProgress);
+        }
     }
-
 
     requestAnimationFrame(animate);
 
