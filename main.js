@@ -48,12 +48,14 @@ const camera = new THREE.PerspectiveCamera(
 	0.1,
 	1000
 );
-camera.position.z = 15;
+camera.position.z = -5.31672;
+camera.position.y = 21.7672;
+camera.position.x = 6.43933;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.id = "3d-canvas"; // Set a unique id for the canvas
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+// renderer.toneMapping = THREE.ACESFilmicToneMapping;
+// renderer.toneMappingExposure = 1.0;
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------------------CAMERA CONTROLS-----------------------------------------*/
@@ -168,10 +170,32 @@ function updatePosition(e) {
 
 /* -----------------------------------------MATERIALS-----------------------------------------*/
 
+function findObjectByName(obj, name) {
+    if (obj.name === name) {
+        return obj;
+    }
+    for (let child of obj.children) {
+        let result = findObjectByName(child, name);
+        if (result) {
+            return result;
+        }
+    }
+    return null;
+}
+
+let moonMesh, moonLight; 
+
 const gltfLoader = new GLTFLoader();
 
-gltfLoader.load('test2.glb', function (gltf) {
-    scene.add(gltf.scene); // `gltf.scene` contains the model's scene graph
+gltfLoader.load('scene.gltf', function (gltf) {
+    scene.add(gltf.scene);
+    moonMesh = findObjectByName(gltf.scene, "Sphere006");
+    moonLight = scene.getObjectByName("moon"); 
+    if (moonMesh && moonLight) {
+        animate(); // Only start animation if both objects are found
+    } else {
+        console.error('Failed to find the moon mesh or light in the scene.');
+    }
 }, undefined, function (error) {
     console.error('An error happened during the loading of the model:', error);
 });
@@ -180,94 +204,49 @@ gltfLoader.load('test2.glb', function (gltf) {
 
 /* -----------------------------------------LIGHTS-----------------------------------------*/
 
-const exrLoader = new EXRLoader();
-exrLoader.load(
-    '/textures/NightEnvironmentHDRI007_4K-HDR.exr',
-    function (texture) {
-      texture.mapping = THREE.EquirectangularReflectionMapping;
-      scene.environment = texture;
-    },
-    undefined, // Progress callback (optional)
-    function (error) {
-      console.error('An error happened loading the EXR file:', error);
-    }
-  );
-
-//   function addStar() {
-//     const geometry = new THREE.SphereGeometry(0.1, 24, 24);
-//     const material = new THREE.MeshStandardMaterial({
-//       color: 0xffffff,
-//       emissive: 0xffffff,
-//       emissiveIntensity: 1
-//     });
-//     const star = new THREE.Mesh(geometry, material);
-
-//     const x = THREE.MathUtils.randFloatSpread(1000);
-//     const y = THREE.MathUtils.randFloat(300, 500);
-//     const z = THREE.MathUtils.randFloatSpread(1000);
-
-//     star.position.set(x, y, z);
-//     scene.add(star);
-
-//     // Glow effect
-//     const spriteMaterial = new THREE.SpriteMaterial({
-//       map: new THREE.TextureLoader().load('textures/blue_star.png'), // Use a glow effect texture
-//       color: 0xffffff,
-//       transparent: true,
-//       blending: THREE.AdditiveBlending
-//     });
-//     const sprite = new THREE.Sprite(spriteMaterial);
-//     sprite.scale.set(2, 2, 1); // Adjust scale to make the glow effect larger or smaller
-//     star.add(sprite); // Add the glow effect as a child of the star so it moves with the star
-// }
-
-// Array(100).fill().forEach(addStar); // Add 200 stars
-// const ambientLight = new THREE.AmbientLight(0x555555);
-// scene.add(ambientLight);
-
-
-
-
-
-
-
-
-
-
-
-
-// Moon
-const moonTexture = new THREE.TextureLoader().load('path_to_moon_texture.jpg'); // Replace with the path to your texture
-const moonGeo = new THREE.SphereGeometry(5, 32, 32);
-const moonMat = new THREE.MeshStandardMaterial({
-  map: moonTexture,
-  emissive: 0xffffff,
-  emissiveIntensity: 0.5
-});
-
-const moon = new THREE.Mesh(moonGeo, moonMat);
-moon.position.set(50, 100, -300); // Adjust position according to your scene
-scene.add(moon);
-
-
+// const exrLoader = new EXRLoader();
+// exrLoader.load(
+//     '/textures/NightEnvironmentHDRI007_4K-HDR.exr',
+//     function (texture) {
+//       texture.mapping = THREE.EquirectangularReflectionMapping;
+//       scene.environment = texture;
+//     },
+//     undefined, // Progress callback (optional)
+//     function (error) {
+//       console.error('An error happened loading the EXR file:', error);
+//     }
+//   );
 
 /* -----------------------------------------RENDERING-----------------------------------------*/
 
-let clock = new THREE.Clock();
-// Render loop
-// function animate() {
-// 	requestAnimationFrame(animate);
-// 	if (keys.up) camera.position.z -= cameraSpeed;
-// 	if (keys.down) camera.position.z += cameraSpeed;
-// 	if (keys.left) camera.position.x -= cameraSpeed;
-// 	if (keys.right) camera.position.x += cameraSpeed;
-//     if (keys.space) camera.position.y += cameraSpeed;
-//     if (keys.shift) camera.position.y -= cameraSpeed;
+let startTime = Date.now();
+const cycleDuration = 600000; // 10 minutes in milliseconds (5 minutes for night + 5 minutes for day)
+//const cycleDuration = 100000;
 
-// 	renderer.render(scene, camera);
-// 	console.log(camera.position);
-// }
 function animate() {
+    let elapsedTime = Date.now() - startTime;
+  let cycleProgress = (elapsedTime % cycleDuration) / cycleDuration;
+  let isNight = cycleProgress < 0.5;
+
+  if (isNight) {
+    moonMesh.visible = true; // Make the moon visible during night
+    // Move the moon based on cycleProgress, this is a simplified linear movement
+    let moonPathProgress = cycleProgress / 0.5; // Normalize progress to [0,1] for night time
+    moonMesh.position.x = moonPathProgress * 10 - 5; // Example movement from -5 to 5 on x-axis
+    moonLight.color.setHSL(0.13, 1, Math.max(0.2, 1 - 2 * moonPathProgress)); // Change color to yellowish as it approaches day
+    moonLight.intensity = Math.max(1, 2 - 4 * moonPathProgress); // Decrease intensity as it approaches day
+  } else {
+    // During day, keep the moon outside of the scene or make it invisible
+    moonMesh.visible = false;
+    // Reset moon's position for the next night
+    if (moonMesh.position.x !== -5) moonMesh.position.x = -5;
+
+    // Change light to be yellow and more intense as it becomes daytime
+    let dayProgress = (cycleProgress - 0.5) * 2; // Normalize progress to [0,1] for day time
+    moonLight.color.setHSL(0.13, 1, Math.min(1, 0.2 + dayProgress)); // Change color to more yellow as day progresses
+    moonLight.intensity = Math.min(2, 1 + dayProgress); // Increase intensity during day
+  }
+
     requestAnimationFrame(animate);
 
     const direction = new THREE.Vector3();
@@ -298,6 +277,3 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-animate();
-
-// Handle keyboard events for camera movement
