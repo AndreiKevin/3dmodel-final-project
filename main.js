@@ -48,9 +48,9 @@ const camera = new THREE.PerspectiveCamera(
 	0.1,
 	1000
 );
-camera.position.z = -5.31672;
-camera.position.y = 21.7672;
-camera.position.x = 6.43933;
+camera.position.x = 5.97;
+camera.position.y = -5.56;
+camera.position.z = -23.76;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.domElement.id = "3d-canvas"; // Set a unique id for the canvas
@@ -187,6 +187,11 @@ gltfLoader.load('scene.gltf', function (gltf) {
     moonMesh = findObjectByName(gltf.scene, "Sphere006");
     moonLight = scene.getObjectByName("moon"); 
     if (moonMesh && moonLight) {
+        gltf.scene.traverse((object) => {
+            if (object.name === 'moon' && object.isLight) {
+              object.intensity = 0.5; 
+            }
+          });
         animate(); // Only start animation if both objects are found
     } else {
         console.error('Failed to find the moon mesh or light in the scene.');
@@ -198,8 +203,8 @@ gltfLoader.load('scene.gltf', function (gltf) {
 /* -----------------------------------------RENDERING-----------------------------------------*/
 
 let startTime = Date.now();
-const cycleDuration = 600000; // 10 minutes in milliseconds (5 minutes for night + 5 minutes for day)
-const initialDelayDuration = 600000;
+const cycleDuration = 60000;
+const initialDelayDuration = 120000;
 //const cycleDuration = 10000;
 
 let originalMoonColor = new THREE.Color(0xE1E6FF); 
@@ -277,6 +282,8 @@ function animate() {
     if (keys.shift) { // Shift - move down
         camera.position.y -= speed;
     }
+
+    //console.log(`(${camera.position.x}, ${camera.position.y}, ${camera.position.z})`);
 
     renderer.render(scene, camera);
 }
